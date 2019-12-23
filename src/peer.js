@@ -100,7 +100,8 @@ class Peer extends EventEmitter {
     socket.once('close', () => {
       this.disconnect(new Error('Socket closed'))
     })
-    socket.on('error', this._error.bind(this))
+    //socket.on('error', this._error.bind(this))
+    socket.on('error', this.socketerror.bind(this))
 
     var protocolOpts = {
       magic: this.params.magic,
@@ -145,7 +146,19 @@ class Peer extends EventEmitter {
     this.disconnected = true
     if (this._handshakeTimeout) clearTimeout(this._handshakeTimeout)
     clearInterval(this._pingInterval)
+    //console.log('peer disconnect socket',this.socket._peername.address)
     this.socket.end()
+    this.emit('disconnect', err)
+  }
+
+  disconnect_download (err) {
+    if (this.disconnected) return
+    this.disconnected = true
+    if (this._handshakeTimeout) clearTimeout(this._handshakeTimeout)
+    clearInterval(this._pingInterval)
+    //console.log('peer disconnect socket',this.socket._peername.address)
+    this.socket.end()
+    console.log('download err is ',err)
     this.emit('disconnect', err)
   }
 
@@ -163,7 +176,13 @@ class Peer extends EventEmitter {
     this.send('ping', { nonce })
   }
 
+  socketerror(err){
+      //console.log('socket error')
+    this.disconnect(err);
+  }
+
   _error (err) {
+    //console.log( 'peer-_error' )
     this.emit('error', err)
     this.disconnect(err)
   }
@@ -302,7 +321,7 @@ class Peer extends EventEmitter {
       cb = opts
       opts = {}
     }
-
+    
     var output = new Array(txids.length)
 
     if (blockHash) {

@@ -94,6 +94,7 @@ class PeerGroup extends EventEmitter {
       err = err || Error('Connection error')
       debug(`peer connection error: ${err.message}`)
       peer.removeListener('disconnect', onError)
+      //console.log('connectError')
       this.emit('connectError', err, peer)
       if (this.connecting) this._connectPeer()
     }
@@ -257,6 +258,7 @@ class PeerGroup extends EventEmitter {
       peer.once('disconnect', () => {
         if (this.peers.length === 0) cb(null)
       })
+      console.log('peergroup close -> ')
       peer.disconnect(Error('PeerGroup closing'))
     }
   }
@@ -300,6 +302,7 @@ class PeerGroup extends EventEmitter {
       this.emit('disconnect', peer, err)
     })
     peer.on('error', (err) => {
+      console.log('peerGroup = ',err, '= peerGroup');
       this.emit('peerError', err)
       peer.disconnect(err)
     })
